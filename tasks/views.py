@@ -3,7 +3,7 @@ from .models import Task
 from .forms import TaskForm
 
 def task_list(request):
-    tasks = Task.objects.order_by('- created_at')
+    tasks = Task.objects.order_by('-created_at')  # corrigido aqui
     return render(request, 'tasks/task_list.html', {'tasks': tasks})
     
 def task_create(request):
