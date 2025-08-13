@@ -1,6 +1,23 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Task
 from .forms import TaskForm
+from django.contrib.auth import login
+from django.contrib.auth.decorators import login_required
+from. forms import CadastroUsuarioForm
+
+def cadastro_usuario(request):
+    if request.method == 'POST':
+        form = CadastroUsuarioForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('tasks:list')
+    else:
+        form = CadastroUsuarioForm()
+    return render(request, 'cadastro_usuario.html', {'form': form})
+
+@login_required
+
 
 def task_list(request):
     tasks = Task.objects.order_by('-created_at')  # corrigido aqui

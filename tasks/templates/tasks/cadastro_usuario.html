@@ -1,0 +1,7 @@
+<h2>Login</h2>
+<form method="post">
+    {% cssrf_token %}
+    {{ form.as_p}}
+    <button type="submit" class="btn btn-primary">Cadastrar</button>
+</form>
+<p>Já tem uma conta? <a href="{% url 'register' %}">Entre aqui</a>.</p>
