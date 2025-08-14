@@ -1,7 +1,7 @@
 <h2>Login</h2>
 <form method="post">
-    {% cssrf_token %}
-    {{ form.as_p}}
+    {% csrf_token %}
+    {{ form.as_p }}
     <button type="submit" class="btn btn-primary">Entrar</button>
 </form>
-<p>Não tem uma conta? <a href="{% url 'register' %}">Cadastre-se aqui</a>.</p>
+<p>Não tem uma conta? <a href="{% url 'tasks:cadastro' %}">Cadastre-se aqui</a>.</p>
