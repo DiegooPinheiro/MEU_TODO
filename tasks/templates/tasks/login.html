@@ -1,7 +1,228 @@
-<h2>Login</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Entrar</button>
-</form>
-<p>Não tem uma conta? <a href="{% url 'tasks:cadastro' %}">Cadastre-se aqui</a>.</p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login | ToDoApp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg-1:#0b1020;
+      --bg-2:#111a33;
+      --neon:#00eaff;
+      --neon-2:#9b5cff;
+      --text:#e8f1ff;
+      --muted:#94a3b8;
+      --error:#ff5c7a;
+    }
+
+    /* Fundo animado “galáxia” */
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 10% -20%, #14223f 0%, rgba(20,34,63,0) 60%),
+                  radial-gradient(900px 500px at 110% 120%, #121b32 0%, rgba(18,27,50,0) 60%),
+                  linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      font-family: 'Inter', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, sans-serif;
+      overflow:hidden;
+    }
+
+    /* Partículas de fundo */
+    .particles{
+      position:fixed; inset:0; pointer-events:none; overflow:hidden;
+      background-image:
+        radial-gradient(2px 2px at 20% 30%, rgba(255,255,255,0.25) 0, rgba(255,255,255,0) 100%),
+        radial-gradient(2px 2px at 70% 60%, rgba(255,255,255,0.18) 0, rgba(255,255,255,0) 100%),
+        radial-gradient(2px 2px at 40% 80%, rgba(255,255,255,0.20) 0, rgba(255,255,255,0) 100%);
+      animation: twinkle 6s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle{
+      from{ opacity: .6; transform: scale(1);}
+      to  { opacity: 1;  transform: scale(1.03);}
+    }
+
+    /* Card principal com vidro e brilho */
+    .card{
+      width:min(92vw, 420px);
+      padding:28px 26px;
+      border-radius:20px;
+      position:relative;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.08) inset,
+        0 20px 40px rgba(0,0,0,0.45);
+      isolation:isolate;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-2px;
+      z-index:-1; border-radius:22px;
+      background: conic-gradient(from 180deg, var(--neon), var(--neon-2), var(--neon), #20ffd0, var(--neon-2));
+      filter: blur(18px); opacity:.35;
+      animation: glow 8s linear infinite;
+    }
+    @keyframes glow{ to{ transform: rotate(1turn); } }
+
+    .brand{
+      display:flex; align-items:center; gap:10px;
+      margin-bottom:14px;
+      font-family:'Orbitron', ui-sans-serif;
+      letter-spacing:.6px;
+    }
+    .brand .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: radial-gradient(circle at 30% 30%, #ffffff 0%, #caffff 15%, rgba(0,234,255,.85) 45%, rgba(0,234,255,0) 60%),
+                  radial-gradient(circle at 70% 70%, rgba(155,92,255,.9) 0%, rgba(155,92,255,0) 55%);
+      box-shadow: 0 0 24px rgba(0,234,255,.55), inset 0 0 18px rgba(155,92,255,.6);
+    }
+    .brand h1{
+      font-size:1.1rem; margin:0; font-weight:700;
+    }
+    .subtitle{
+      margin:0 0 18px; color:var(--muted); font-size:.95rem;
+    }
+
+    form{ margin-top:10px; }
+
+    .field{
+      margin-bottom:16px;
+    }
+    .label{
+      display:block; margin:0 0 6px; font-size:.9rem; color:#b9c6e4;
+    }
+
+    /* INPUT NEON */
+    .neon-input{
+      position:relative;
+    }
+    .neon-input input{
+      width:100%;
+      padding:12px 14px 12px 14px;
+      font-size:1rem; color:var(--text);
+      background: rgba(12,18,36, .65);
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:12px;
+      outline:none;
+      transition: box-shadow .25s ease, border-color .25s ease, transform .08s ease;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .neon-input input::placeholder{ color:#7f8fb3; opacity:.7; }
+    .neon-input input:focus{
+      border-color: transparent;
+      box-shadow:
+        0 0 12px rgba(0,234,255,.45),
+        0 0 36px rgba(155,92,255,.25),
+        inset 0 0 10px rgba(0,234,255,.25);
+      transform: translateY(-1px);
+    }
+    /* borda animada */
+    .neon-input::after{
+      content:"";
+      position:absolute; inset:-2px; border-radius:14px; z-index:-1;
+      background: conic-gradient(from 0deg, transparent 0 10%, rgba(0,234,255,.6) 20%, transparent 30% 60%, rgba(155,92,255,.6) 70%, transparent 80% 100%);
+      filter: blur(10px); opacity:0; transition:opacity .25s ease;
+      animation: ring 5s linear infinite;
+    }
+    .neon-input:focus-within::after{ opacity:1; }
+    @keyframes ring{ to{ transform: rotate(1turn); } }
+
+    /* Erros */
+    .errors, .nonfield{
+      margin-top:8px; font-size:.85rem; color:var(--error);
+      text-shadow: 0 0 10px rgba(255,92,122,.25);
+    }
+
+    /* Botão */
+    .btn{
+      width:100%; padding:12px 14px;
+      border:0; border-radius:12px;
+      font-weight:700; letter-spacing:.5px;
+      text-transform:uppercase; cursor:pointer;
+      color:#06101e; background: linear-gradient(90deg, var(--neon), #4bffd9);
+      box-shadow: 0 8px 26px rgba(0,234,255,.35), inset 0 -2px 8px rgba(255,255,255,.35);
+      transition: transform .08s ease, box-shadow .2s ease, filter .2s ease;
+    }
+    .btn:hover{ filter:saturate(115%); box-shadow: 0 10px 34px rgba(0,234,255,.45); }
+    .btn:active{ transform: translateY(1px); }
+
+    .alt{
+      margin-top:14px; text-align:center; color:#b7c5e6; font-size:.95rem;
+    }
+    .alt a{
+      color:var(--neon); text-decoration:none; font-weight:700;
+    }
+    .alt a:hover{ text-decoration:underline; }
+
+    /* Rodapé sutil */
+    .foot{
+      position:fixed; bottom:10px; left:0; right:0;
+      text-align:center; font-size:.8rem; color:#7e8fb5;
+      opacity:.85;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="particles" aria-hidden="true"></div>
+
+  <main class="card" role="main" aria-labelledby="title">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <h1 id="title">ToDoApp</h1>
+    </div>
+    <p class="subtitle">Acesse sua conta para continuar organizando suas tarefas.</p>
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="nonfield">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="field">
+        <label class="label" for="{{ form.username.id_for_label }}">Usuário</label>
+        <div class="neon-input">
+          {{ form.username }}
+        </div>
+        {% if form.username.errors %}
+          <div class="errors">{{ form.username.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <div class="field">
+        <label class="label" for="{{ form.password.id_for_label }}">Senha</label>
+        <div class="neon-input">
+          {{ form.password }}
+        </div>
+        {% if form.password.errors %}
+          <div class="errors">{{ form.password.errors|striptags }}</div>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="btn">Entrar</button>
+    </form>
+
+    <p class="alt">Não tem uma conta? <a href="{% url 'tasks:cadastro' %}">Cadastre-se</a></p>
+  </main>
+
+  <div class="foot">© {{ now|default:"" }} ToDoApp — interface neon futurista</div>
+
+  <script>
+    // Melhor acessibilidade: adiciona placeholders sem precisar de libs extras
+    (function(){
+      const u = document.getElementById('{{ form.username.id_for_label }}');
+      const p = document.getElementById('{{ form.password.id_for_label }}');
+      if(u && !u.placeholder) u.placeholder = 'Seu usuário';
+      if(p && !p.placeholder) p.placeholder = 'Sua senha';
+    })();
+  </script>
+</body>
+</html>
